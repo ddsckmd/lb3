@@ -1,29 +1,58 @@
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPBasicAuth
+import json
+import os
+
+##### Щоб перевірити що обидва працюють, прибрати #
+# if os.path.exists("catalog.json"):
+#    os.remove("catalog.json")
+# if os.path.exists("users.json"):
+#    os.remove("users.json")
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
-# Каталог товару
-catalog = {
-    1: {"name": "Apples", "type": "fruit", "price": 35.00, "weight": "1 kg"},
-    2: {"name": "Bananas", "type": "fruit", "price": 30.00, "weight": "1 kg"},
-    3: {"name": "Carrots", "type": "vegetable", "price": 25.00, "weight": "1 kg"},
-    4: {"name": "Potatoes", "type": "vegetable", "price": 20.00, "weight": "1 kg"},
-    5: {"name": "Chicken Breast", "type": "meat", "price": 120.00, "weight": "1 kg"},
-    6: {"name": "Pork Loin", "type": "meat", "price": 150.00, "weight": "1 kg"},
-    7: {"name": "Rice", "type": "grain", "price": 50.00, "weight": "1 kg"},
-    8: {"name": "Flour", "type": "grain", "price": 40.00, "weight": "1 kg"},
-    9: {"name": "Milk", "type": "dairy", "price": 25.00, "weight": "1 liter"},
-    10: {"name": "Cheese", "type": "dairy", "price": 200.00, "weight": "1 kg"},
-}
+# Файли для зберігання даних
+CATALOG_FILE = "catalog.json"
+USERS_FILE = "users.json"
+
+# Ініціалізація файлів
+if not os.path.exists(CATALOG_FILE):
+    with open(CATALOG_FILE, 'w') as f:
+        json.dump({
+            1: {"name": "Apples", "type": "fruit", "price": 35.00, "weight": "1 kg"},
+            2: {"name": "Bananas", "type": "fruit", "price": 30.00, "weight": "1 kg"},
+            3: {"name": "Carrots", "type": "vegetable", "price": 25.00, "weight": "1 kg"},
+            4: {"name": "Potatoes", "type": "vegetable", "price": 20.00, "weight": "1 kg"},
+            5: {"name": "Chicken Breast", "type": "meat", "price": 120.00, "weight": "1 kg"},
+            6: {"name": "Pork Loin", "type": "meat", "price": 150.00, "weight": "1 kg"},
+            7: {"name": "Rice", "type": "grain", "price": 50.00, "weight": "1 kg"},
+            8: {"name": "Flour", "type": "grain", "price": 40.00, "weight": "1 kg"},
+            9: {"name": "Milk", "type": "dairy", "price": 25.00, "weight": "1 liter"},
+            10: {"name": "Cheese", "type": "dairy", "price": 200.00, "weight": "1 kg"}
+        }, f)
+
+if not os.path.exists(USERS_FILE):
+    with open(USERS_FILE, 'w') as f:
+        json.dump({"admin": "admpass", "user": "uspass"}, f)
 
 
-# Дані для авторизації
-users = {
-    "admin": "admpass",
-    "user": "uspass"
-}
+# Завантаження каталогу з файлу
+def load_catalog():
+    with open(CATALOG_FILE, 'r') as f:
+        return json.load(f)
+
+
+# Збереження каталогу у файл
+def save_catalog(catalog):
+    with open(CATALOG_FILE, 'w') as f:
+        json.dump(catalog, f)
+
+
+# Завантаження даних користувачів з файлу
+def load_users():
+    with open(USERS_FILE, 'r') as f:
+        return json.load(f)
 
 # Авторизація
 @auth.get_password
